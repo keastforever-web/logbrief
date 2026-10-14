@@ -7,6 +7,17 @@ from logbrief import clean, render, summarize
 
 
 class LogBriefTests(unittest.TestCase):
+    def test_python_exception_survives_long_traceback(self):
+        for exception in ['ValueError', 'TypeError', 'RuntimeError', 'custom.ParseError', 'custom.ServiceException']:
+            with self.subTest(exception=exception):
+                text = '\n'.join(['Traceback (most recent call last):'] + ['  frame details'] * 10 + [exception + ': broken'] + ['cleanup complete'] * 10)
+                result = summarize(text, 1, 0)
+                self.assertEqual(result['entries'][0]['text'], exception + ': broken')
+
+    def test_exception_words_in_prose_are_not_error_headers(self):
+        result = summarize('Documentation for ValueError\nall done', 1, 0)
+        self.assertEqual(result['error_lines'], 0)
+
     def test_failure_survives_noise(self):
         data = '\n'.join(['noise'] * 200 + ['fatal: compile failed', 'source.c:12'] + ['noise'] * 200)
         result = summarize(data, 5, 1)

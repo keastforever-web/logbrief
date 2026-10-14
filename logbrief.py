@@ -7,6 +7,7 @@ from pathlib import Path
 
 ANSI = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]")
 ERROR = re.compile(r"\b(error|failed|failure|exception|traceback|fatal|panic)\b", re.I)
+EXCEPTION_HEADER = re.compile(r"^\s*(?:[A-Za-z_]\w*\.)*[A-Za-z_]\w*(?:Error|Exception)\s*:")
 SECRETS = [
     (re.compile(r"\b(?:gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,})\b"), "[REDACTED]"),
     (re.compile(r"(?i)(\b(?:api[_-]?key|token|password|secret)\b\s*[:=]\s*)(?:\"[^\"]*\"|'[^']*'|[^\s,;]+)"), r"\1[REDACTED]"),
@@ -26,7 +27,7 @@ def summarize(text, max_lines=80, context=2):
     if max_lines < 1 or context < 0:
         raise ValueError("max_lines must be positive and context nonnegative")
     lines = clean(text).splitlines()
-    hits = [i for i, line in enumerate(lines) if ERROR.search(line)]
+    hits = [i for i, line in enumerate(lines) if ERROR.search(line) or EXCEPTION_HEADER.search(line)]
     # Prefer recent failures, then nearby context, then the final output.
     priority = list(reversed(hits))
     for distance in range(1, context + 1):
