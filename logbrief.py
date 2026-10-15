@@ -9,6 +9,7 @@ ANSI = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]")
 ERROR = re.compile(r"\b(error|failed|failure|exception|traceback|fatal|panic)\b", re.I)
 EXCEPTION_HEADER = re.compile(r"^\s*(?:[A-Za-z_]\w*\.)*[A-Za-z_]\w*(?:Error|Exception)\s*:")
 SECRETS = [
+    (re.compile(r"(?i)([\"'](?:api[_-]?key|token|password|secret)[\"']\s*:\s*)(?:\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*')"), r'\1"[REDACTED]"'),
     (re.compile(r"\b(?:gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,})\b"), "[REDACTED]"),
     (re.compile(r"(?i)(\b(?:api[_-]?key|token|password|secret)\b\s*[:=]\s*)(?:\"[^\"]*\"|'[^']*'|[^\s,;]+)"), r"\1[REDACTED]"),
     (re.compile(r"(?i)(\bBearer\s+)\S+"), r"\1[REDACTED]"),

@@ -7,6 +7,24 @@ from logbrief import clean, render, summarize
 
 
 class LogBriefTests(unittest.TestCase):
+    def test_json_secret_keys_are_redacted(self):
+        for key in ['token', 'api_key', 'password', 'secret']:
+            with self.subTest(key=key):
+                payload = json.dumps({key: 'private value', 'message': 'keep this'})
+                result = clean(payload)
+                self.assertNotIn('private value', result)
+                self.assertIn('keep this', result)
+
+    def test_single_quoted_secret_key(self):
+        self.assertNotIn('private value', clean("{'token': 'private value'}"))
+
+    def test_json_escaped_secret_is_fully_redacted(self):
+        payload = json.dumps({'token': 'prefix "hidden" suffix'})
+        result = clean(payload)
+        self.assertNotIn('hidden', result)
+        self.assertNotIn('suffix', result)
+
+
     def test_python_exception_survives_long_traceback(self):
         for exception in ['ValueError', 'TypeError', 'RuntimeError', 'custom.ParseError', 'custom.ServiceException']:
             with self.subTest(exception=exception):

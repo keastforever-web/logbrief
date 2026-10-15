@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased — 2026-10-15
+
+- Fix credential masking for quoted JSON/dictionary keys (token, api_key, password and secret), including escaped quotes in values.
+- Add regression tests for quoted keys and escaped values. Local Python 3.13: 13 tests passed.
+
 ## Unreleased — 2026-10-14
 
 - Fix Python exception headers such as ValueError, TypeError and qualified custom errors being omitted from small-budget summaries.
