@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — 2026-10-16
+
+- Preserve ordinary Python traceback frames as a complete block when they fit the remaining source-line budget, before adding unrelated tail output.
+- Keep the hard line budget and recent-error priority when a block cannot fit. Exception groups and prefixed traceback formats remain unsupported.
+- Added traceback retention and small-budget regression tests; 15 tests pass locally on Python 3.13.
+
 ## Unreleased — 2026-10-15
 
 - Fix credential masking for quoted JSON/dictionary keys (token, api_key, password and secret), including escaped quotes in values.
