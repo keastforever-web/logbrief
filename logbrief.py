@@ -35,12 +35,27 @@ def summarize(text, max_lines=80, context=2):
         for i in reversed(hits):
             priority.extend([i + distance, i - distance])
     priority.extend(range(len(lines) - 1, -1, -1))
-    selected = set()
+    selected = set(list(reversed(hits))[:max_lines])
+    # Keep ordinary Python traceback frames together when the remaining budget fits.
+    groups = []
+    start = None
+    for i, line in enumerate(lines):
+        if line.strip() == 'Traceback (most recent call last):':
+            start = i
+        elif start is not None and EXCEPTION_HEADER.search(line):
+            groups.append((start, i))
+            start = None
+        elif start is not None and line and not line[0].isspace():
+            start = None
+    for start, end in reversed(groups):
+        group = set(range(start, end + 1))
+        if len(selected | group) <= max_lines:
+            selected.update(group)
     for i in priority:
-        if 0 <= i < len(lines):
-            selected.add(i)
         if len(selected) >= max_lines:
             break
+        if 0 <= i < len(lines):
+            selected.add(i)
     entries = []
     for i in sorted(selected):
         if entries and entries[-1]["end"] == i and entries[-1]["text"] == lines[i]:
