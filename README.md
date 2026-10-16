@@ -25,7 +25,7 @@ Optional installation: `python -m pip install .`, then use `logbrief build.log`.
 
 1. Strip ANSI color codes and mask common credential patterns.
 2. Select error-keyword lines, newest first, within the requested line budget.
-3. Add surrounding lines, then fill remaining space with recent output.
+3. Preserve complete ordinary Python traceback blocks when the remaining line budget fits; otherwise retain prioritized error lines. Add surrounding lines, then fill remaining space with recent output.
 4. Restore chronological order, fold adjacent identical lines, and show omitted ranges.
 
 Example input: three `waiting` lines, `error: compilation failed`, `source.c:12`.
@@ -51,7 +51,7 @@ The initial tests cover failure retention amid noise, budgets, line numbers, rep
 
 ## Roadmap
 
-- Preserve complete multi-line traceback groups.
+- Extend traceback support to exception groups and nonstandard log prefixes.
 - Add configurable keyword patterns and redaction rules.
 - Stream large files with bounded memory.
 
