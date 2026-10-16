@@ -7,6 +7,16 @@ from logbrief import clean, render, summarize
 
 
 class LogBriefTests(unittest.TestCase):
+    def test_complete_traceback_retained_when_budget_fits(self):
+        traceback = ['Traceback (most recent call last):', '  File "demo.py", line 4, in main', '    int("x")', 'ValueError: invalid literal']
+        result = summarize('\n'.join(['noise'] * 10 + traceback + ['done'] * 10), 4, 0)
+        self.assertEqual([entry['text'] for entry in result['entries']], traceback)
+
+    def test_traceback_does_not_exceed_budget(self):
+        result = summarize('Traceback (most recent call last):\n  frame\nValueError: broken\ndone', 1, 0)
+        self.assertEqual(result['selected_lines'], 1)
+        self.assertEqual(result['entries'][0]['text'], 'ValueError: broken')
+
     def test_json_secret_keys_are_redacted(self):
         for key in ['token', 'api_key', 'password', 'secret']:
             with self.subTest(key=key):
