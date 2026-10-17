@@ -7,6 +7,19 @@ from logbrief import clean, render, summarize
 
 
 class LogBriefTests(unittest.TestCase):
+    def test_custom_match_keeps_project_specific_failure(self):
+        result = summarize('BUILD STOPPED: missing SDK\n' + '\n'.join(['cleanup'] * 20), 1, 0, matches=['build stopped'])
+        self.assertEqual(result['entries'][0]['text'], 'BUILD STOPPED: missing SDK')
+
+    def test_custom_match_is_literal(self):
+        result = summarize('axb\na.b\ndone', 1, 0, matches=['a.b'])
+        self.assertEqual(result['entries'][0]['text'], 'a.b')
+
+    def test_cli_custom_match(self):
+        process = subprocess.run([sys.executable, str(Path(__file__).with_name('logbrief.py')), '--max-lines', '1', '--match', 'SDK MISSING', '--json'], input='sdk missing\ncleanup\n', text=True, capture_output=True)
+        self.assertEqual(process.returncode, 0)
+        self.assertEqual(json.loads(process.stdout)['entries'][0]['text'], 'sdk missing')
+
     def test_complete_traceback_retained_when_budget_fits(self):
         traceback = ['Traceback (most recent call last):', '  File "demo.py", line 4, in main', '    int("x")', 'ValueError: invalid literal']
         result = summarize('\n'.join(['noise'] * 10 + traceback + ['done'] * 10), 4, 0)
