@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased — 2026-10-17
+
+- Add repeatable --match TEXT for case-insensitive literal prioritization of project-specific failures alongside built-in error detection.
+- Document matching after redaction and priority-count semantics. Regression coverage includes API, CLI and literal punctuation matching.
+
 ## Unreleased — 2026-10-16
 
 - Preserve ordinary Python traceback frames as a complete block when they fit the remaining source-line budget, before adding unrelated tail output.
