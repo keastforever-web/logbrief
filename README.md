@@ -7,6 +7,7 @@ Turn noisy build and test logs into deterministic, line-numbered summaries for h
 ```sh
 python logbrief.py build.log --max-lines 80 --context 2
 python logbrief.py build.log --json
+python logbrief.py build.log --match "BUILD STOPPED" --match "SDK missing"
 ```
 
 Pipe input on Unix or PowerShell:
@@ -22,6 +23,8 @@ Get-Content build.log | python logbrief.py --max-lines 30
 Optional installation: `python -m pip install .`, then use `logbrief build.log`.
 
 ## How it works
+
+Use repeatable `--match TEXT` options to prioritize project-specific messages that do not contain built-in error keywords. Matching is case-insensitive literal substring matching (not regular expressions); blank patterns are ignored. Built-in error detection stays active. JSON `error_lines` counts all priority matches, including custom messages. Matching runs after credential masking, so avoid secret-dependent patterns.
 
 1. Strip ANSI color codes and mask common credential patterns.
 2. Select error-keyword lines, newest first, within the requested line budget.
@@ -52,7 +55,7 @@ The initial tests cover failure retention amid noise, budgets, line numbers, rep
 ## Roadmap
 
 - Extend traceback support to exception groups and nonstandard log prefixes.
-- Add configurable keyword patterns and redaction rules.
+- Add configurable redaction rules.
 - Stream large files with bounded memory.
 
 Inspired by interest in coding-agent context efficiency on [GitHub Trending](https://github.com/trending), including [context-mode](https://github.com/mksglu/context-mode). Independently implemented; no upstream code copied.
