@@ -24,11 +24,13 @@ def clean(text):
     return text
 
 
-def summarize(text, max_lines=80, context=2):
+def summarize(text, max_lines=80, context=2, matches=None):
     if max_lines < 1 or context < 0:
         raise ValueError("max_lines must be positive and context nonnegative")
     lines = clean(text).splitlines()
-    hits = [i for i, line in enumerate(lines) if ERROR.search(line) or EXCEPTION_HEADER.search(line)]
+    keywords = [match.casefold() for match in (matches or []) if match.strip()]
+    hits = [i for i, line in enumerate(lines) if ERROR.search(line) or EXCEPTION_HEADER.search(line)
+            or any(keyword in line.casefold() for keyword in keywords)]
     # Prefer recent failures, then nearby context, then the final output.
     priority = list(reversed(hits))
     for distance in range(1, context + 1):
@@ -90,12 +92,14 @@ def main(argv=None):
     parser.add_argument("--max-lines", type=int, default=80)
     parser.add_argument("--context", type=int, default=2)
     parser.add_argument("--json", action="store_true", help="machine-readable summary")
+    parser.add_argument("--match", action="append", default=[], metavar="TEXT",
+                        help="additional case-insensitive literal priority text; repeatable")
     args = parser.parse_args(argv)
     if args.max_lines < 1 or args.context < 0:
         parser.error("--max-lines must be positive; --context must be nonnegative")
     try:
         text = sys.stdin.read() if args.file == "-" else Path(args.file).read_text(encoding="utf-8", errors="replace")
-        result = summarize(text, args.max_lines, args.context)
+        result = summarize(text, args.max_lines, args.context, matches=args.match)
         print(json.dumps(result, ensure_ascii=True, indent=2) if args.json else render(result), end="\n" if args.json else "")
     except (OSError, UnicodeError) as exc:
         parser.exit(2, f"logbrief: {exc}\n")
